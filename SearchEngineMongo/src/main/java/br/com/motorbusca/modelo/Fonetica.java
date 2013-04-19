@@ -1,19 +1,23 @@
-package br.com.motorbusca.fonetica;
+package br.com.motorbusca.modelo;
 
 /**
- * A busca por fonética consiste em: 
- * - converter todas as letras para minisculo
+ * A busca por fonética consiste em:
+ *  
+ * - converter todas as letras para minúsculo
  * - transformar letras duplas em unidades
  * - converter consoantes com o mesmo fonema (ss <> ç, w <> v...)
  * - remover acentuações
  * - remover caracteres especiais
- * - corrigir erro comuns da lingua
+ * - corrigir erro comuns da lingua (lingua portuguesa)
  * 
- * Estas regras se aplicam para a lingua portuguesa.
+ * Ainda assim esta funcionalidade precisa ser melhorada, pois pode causar
+ * fonemas inválidos para algumas palavras
  * 
  * @author giulliano
  */
-public class GeradorFonetica {
+public class Fonetica {
+
+	//FIXME Aperfeiçoar esta funcionalidade...
 
 	public static String criarFonema(String valor) {
 

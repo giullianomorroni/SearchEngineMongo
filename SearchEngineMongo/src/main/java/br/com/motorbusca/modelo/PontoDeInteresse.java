@@ -1,27 +1,12 @@
 package br.com.motorbusca.modelo;
 
-import java.io.FileReader;
-import java.io.IOException;
 import java.io.Serializable;
-import java.util.Properties;
 
-import br.com.motorbusca.fonetica.GeradorFonetica;
 
 public class PontoDeInteresse implements Serializable {
 
 	private static final long serialVersionUID = -1684649132896438100L;
 
-	private static final Properties icones = new Properties();
-
-	static {
-		try {
-			icones.load(new FileReader("/opt/flagme/categorias/categorias.properties"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private Long idCorporativo;
 	private String nome;
 	private String fonema;
 	private String pictograma;
@@ -34,20 +19,19 @@ public class PontoDeInteresse implements Serializable {
 	private Double latitude;
 	private Double longitude;
 	private Double distancia = 0D;
-	private Integer totalPessoasPresentes = 0;
-	private Boolean possuiOferta = false;
 
 	public PontoDeInteresse() {
 		super();
 	}
 
-	public PontoDeInteresse(Long idCorporativo, String nome,
-			String categoria, String subCategoria,
-			String logradouro, String cidade, String estado, String cep,
-			Double latitude, Double longitude) {
+	public PontoDeInteresse(String nome, String fonema, String pictograma,
+			String categoria, String subCategoria, String logradouro,
+			String cidade, String estado, String cep, Double latitude,
+			Double longitude, Double distancia) {
 		super();
-		this.idCorporativo = idCorporativo;
 		this.nome = nome;
+		this.fonema = Fonetica.criarFonema(nome);
+		this.pictograma = pictograma;
 		this.categoria = categoria;
 		this.subCategoria = subCategoria;
 		this.logradouro = logradouro;
@@ -56,36 +40,7 @@ public class PontoDeInteresse implements Serializable {
 		this.cep = cep;
 		this.latitude = latitude;
 		this.longitude = longitude;
-		this.pictograma = buscarIcone(subCategoria);
-		if (this.pictograma == null)
-			this.pictograma = buscarIcone(categoria);
-		this.fonema = GeradorFonetica.criarFonema(nome);
-	}
-
-	public String buscarIcone(String descricao) {
-		if (descricao == null)
-			return "";
-
-		String aux = descricao;
-		String nomeCategoria =  aux.toLowerCase()
-				.replace("-", "").replace("/", "_e_").replace("  ", "_").replace(" ", "_").replace("__", "_") //dois espacos em branco e um espaco em branco
-				.replace("ã", "a").replace("á", "a").replace("â", "a").replace("à", "a")
-				.replace("é", "e").replace("ẽ", "e").replace("ê", "e")
-				.replace("ó", "o").replace("õ", "o").replace("ô", "o")
-				.replace("í", "i")
-				.replace("ú", "u")
-				.replace("ç", "c");
-
-		String iconeCategoria = icones.getProperty(nomeCategoria);
-		return iconeCategoria;
-	}
-
-	public Long getIdCorporativo() {
-		return idCorporativo;
-	}
-
-	public void setIdCorporativo(Long idCorporativo) {
-		this.idCorporativo = idCorporativo;
+		this.distancia = distancia;
 	}
 
 	public String getNome() {
@@ -182,22 +137,6 @@ public class PontoDeInteresse implements Serializable {
 
 	public void setDistancia(Double distancia) {
 		this.distancia = distancia;
-	}
-
-	public Integer getTotalPessoasPresentes() {
-		return totalPessoasPresentes;
-	}
-
-	public void setTotalPessoasPresentes(Integer totalPessoasPresentes) {
-		this.totalPessoasPresentes = totalPessoasPresentes;
-	}
-
-	public Boolean getPossuiOferta() {
-		return possuiOferta;
-	}
-
-	public void setPossuiOferta(Boolean possuiOferta) {
-		this.possuiOferta = possuiOferta;
 	}
 
 }

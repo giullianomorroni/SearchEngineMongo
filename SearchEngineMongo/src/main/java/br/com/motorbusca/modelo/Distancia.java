@@ -1,6 +1,9 @@
-package br.com.motorbusca.consulta;
+package br.com.motorbusca.modelo;
 
-class GeoLocalizacao {
+import java.util.List;
+
+
+public class Distancia {
 
 	static int EARTH_RADIUS_KM = 6371;
 	static int EARTH_RADIUS_M = EARTH_RADIUS_KM * 1000; //cada km tem 1.000 m
@@ -21,7 +24,7 @@ class GeoLocalizacao {
 	 * @return
 	 * @author giulliano.morroni
 	 */
-	static Double calculoDistancia(Double latitude_1, Double longitude_1, Double latitude_2, Double longitude_2) {
+	public static Double calculoDistancia(Double latitude_1, Double longitude_1, Double latitude_2, Double longitude_2) {
 
 		if (latitude_1 == null || longitude_1 == null || latitude_2 == null || longitude_2 == null)
 			return 0D;
@@ -43,6 +46,41 @@ class GeoLocalizacao {
 				* medida;
 
 		return distancia;
+	}
+
+	/**
+	 * Ordena uma lista de {@link PontoDeInteresse} pela distância da menor para  maior.
+	 * 
+	 * @param lista
+	 * @return
+	 */
+	public static List<PontoDeInteresse> ordenar(List<PontoDeInteresse> lista) {
+		try {
+			Double di = 0d;
+			Double dj = 0d;
+
+			for (int i=0; i < lista.size(); i++) {
+
+				if (lista.size() < i+1)
+					break;
+
+				PontoDeInteresse model_1 = lista.get(i);
+				PontoDeInteresse model_2 = lista.get(i+1);
+
+				di = Double.valueOf(model_1.getDistancia());
+				dj = Double.valueOf(model_2.getDistancia());
+
+				if (di > dj) {
+					PontoDeInteresse menor = model_2;
+					lista.remove(menor);
+					lista.add(i, menor);
+					ordenar(lista);
+				}
+			}
+		} catch (IndexOutOfBoundsException e) {
+			// Fim da ordenação
+		}
+		return lista;
 	}
 
 }

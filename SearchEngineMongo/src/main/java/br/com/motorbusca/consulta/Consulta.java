@@ -3,11 +3,11 @@ package br.com.motorbusca.consulta;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import br.com.motorbusca.base.BaseDeDados;
+import br.com.motorbusca.modelo.Distancia;
 import br.com.motorbusca.modelo.PontoDeInteresse;
 
 import com.mongodb.BasicDBList;
@@ -65,14 +65,11 @@ public class Consulta {
 
 			BasicDBObject poi = (BasicDBObject) registro.get("obj");
 			PontoDeInteresse ponto = new PontoDeInteresse();
-			ponto.setIdCorporativo((Long) poi.get("idCorporativo"));
 			ponto.setNome((String) poi.get("nome"));
 			ponto.setCategoria((String) poi.get("categoria"));
 			ponto.setSubCategoria((String) poi.get("subCategoria"));
 			ponto.setLogradouro((String) poi.get("lograduro"));
 			ponto.setPictograma((String) poi.get("pictograma"));
-			ponto.setPossuiOferta((Boolean) poi.get("possuiOferta"));
-			ponto.setTotalPessoasPresentes((Integer) poi.get("totalPessoasPresentes"));
 			BasicDBList posicionamento = (BasicDBList) poi.get("posicao");
 			ponto.setLongitude((Double) posicionamento.get(0));
 			ponto.setLatitude((Double) posicionamento.get(1));
@@ -165,27 +162,24 @@ public class Consulta {
 
 		for (DBObject poi : resultado.toArray()) {
 			PontoDeInteresse ponto = new PontoDeInteresse();
-			ponto.setIdCorporativo((Long) poi.get("idCorporativo"));
 			ponto.setNome((String) poi.get("nome"));
 			ponto.setCategoria((String) poi.get("categoria"));
 			ponto.setSubCategoria((String) poi.get("subCategoria"));
 			ponto.setLogradouro((String) poi.get("lograduro"));
 			ponto.setPictograma((String) poi.get("pictograma"));
-			ponto.setPossuiOferta((Boolean) poi.get("possuiOferta"));
-			ponto.setTotalPessoasPresentes((Integer) poi.get("totalPessoasPresentes"));
 
 			BasicDBList posicionamento = (BasicDBList) poi.get("posicao");
 			ponto.setLongitude((Double) posicionamento.get(0));
 			ponto.setLatitude((Double) posicionamento.get(1));
 
-			Double distancia = GeoLocalizacao.calculoDistancia(ponto.getLatitude(), ponto.getLatitude(), latitude, longitude);
+			Double distancia = Distancia.calculoDistancia(ponto.getLatitude(), ponto.getLatitude(), latitude, longitude);
 			BigDecimal d = new BigDecimal(distancia);
 			d = d.setScale(0, RoundingMode.HALF_UP);
 			ponto.setDistancia(d.doubleValue());
 
 			pontos.add(ponto);
 		}
-		return OrdenacaoDistancia.ordenar(pontos);
+		return Distancia.ordenar(pontos);
 	}
 
 	public List<PontoDeInteresse> pontosPorPalavraChave(String palavraChave, Integer paginaAtual, Integer totalPorPagina) {
@@ -223,14 +217,11 @@ public class Consulta {
 
 		for (DBObject poi : resultado.toArray()) {
 			PontoDeInteresse ponto = new PontoDeInteresse();
-			ponto.setIdCorporativo((Long) poi.get("idCorporativo"));
 			ponto.setNome((String) poi.get("nome"));
 			ponto.setCategoria((String) poi.get("categoria"));
 			ponto.setSubCategoria((String) poi.get("subCategoria"));
 			ponto.setLogradouro((String) poi.get("lograduro"));
 			ponto.setPictograma((String) poi.get("pictograma"));
-			ponto.setPossuiOferta((Boolean) poi.get("possuiOferta"));
-			ponto.setTotalPessoasPresentes((Integer) poi.get("totalPessoasPresentes"));
 
 			BasicDBList posicionamento = (BasicDBList) poi.get("posicao");
 			ponto.setLongitude((Double) posicionamento.get(0));
@@ -238,48 +229,6 @@ public class Consulta {
 			pontos.add(ponto);
 		}
 		return pontos;
-	}
-
-	public List<String> categoriasPorProximidade(Double latitude, Double longitude, Double raioDeBusca) {
-		List<String> categorias = new ArrayList<>(); 
-		DBCollection colecao = BaseDeDados.colecao("poi");
-
-		BasicDBObject fields = new BasicDBObject();
-		fields.put("categoria", 1);
-
-		Double[] posicao = {longitude, latitude};
-		BasicDBObject query = new BasicDBObject();
-		final BasicDBObject filter = new BasicDBObject("$nearSphere", posicao);
-		filter.put("$maxDistance", raioDeBusca / CIRCUNFERENCIA_TERRA);
-		query.put("posicao", filter);
-
-		DBCursor resultados = colecao.find(query, fields);
-		for (DBObject poi : resultados.toArray()) {
-			categorias.add((String) poi.get("categoria"));
-		}
-		Collections.sort(categorias);
-		return categorias;
-	}
-	
-	public List<String> subCategoriasPorProximidade(Double latitude, Double longitude, Double raioDeBusca) {
-		List<String> subCategorias = new ArrayList<>(); 
-		DBCollection colecao = BaseDeDados.colecao("poi");
-
-		BasicDBObject fields = new BasicDBObject();
-		fields.put("subCategoria", 1);
-
-		Double[] posicao = {longitude, latitude};
-		BasicDBObject query = new BasicDBObject();
-		final BasicDBObject filter = new BasicDBObject("$nearSphere", posicao);
-		filter.put("$maxDistance", raioDeBusca / CIRCUNFERENCIA_TERRA);
-		query.put("posicao", filter);
-
-		DBCursor resultados = colecao.find(query, fields);
-		for (DBObject poi : resultados.toArray()) {
-			subCategorias.add((String) poi.get("subCategoria"));
-		}
-		Collections.sort(subCategorias);
-		return subCategorias;
 	}
 
 	/**

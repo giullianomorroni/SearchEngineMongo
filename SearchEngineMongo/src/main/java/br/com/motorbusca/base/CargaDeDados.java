@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import br.com.motorbusca.fonetica.GeradorFonetica;
+import br.com.motorbusca.modelo.Fonetica;
 import br.com.motorbusca.modelo.PontoDeInteresse;
 
 import com.mongodb.BasicDBObject;
@@ -51,7 +51,6 @@ public class CargaDeDados {
 		ResultSet rs = ps.executeQuery();
 		while (rs.next()) {
 			PontoDeInteresse poi = new PontoDeInteresse();
-			poi.setIdCorporativo(rs.getLong("ID_ESTABELECIMENTO"));
 			poi.setNome(rs.getString("NOME_FANTASIA"));
 			poi.setCategoria(rs.getString("CATEGORIA"));
 			poi.setSubCategoria(rs.getString("SUBCATEGORIA")); 
@@ -69,10 +68,7 @@ public class CargaDeDados {
 			poi.setEstado(rs.getString("ESTADO")); 
 			poi.setLatitude(rs.getDouble("LATITUDE"));
 			poi.setLongitude(rs.getDouble("LONGITUDE"));
-			poi.setFonema(GeradorFonetica.criarFonema(poi.getNome()));
-			poi.setPictograma(poi.buscarIcone(poi.getSubCategoria()));
-			if (poi.getPictograma() == null)
-				poi.setPictograma(poi.buscarIcone(poi.getCategoria()));
+			poi.setFonema(Fonetica.criarFonema(poi.getNome()));
 			pois.add(poi);
 		}
 		conexao.close();
@@ -82,7 +78,6 @@ public class CargaDeDados {
 		DBCollection collection = BaseDeDados.colecao("poi");
 		for (PontoDeInteresse p : pois) {
 			DBObject doc = new BasicDBObject();
-			doc.put("idCorporativo", p.getIdCorporativo());
 			doc.put("nome", p.getNome());
 			doc.put("fonema", p.getFonema());
 
@@ -96,15 +91,11 @@ public class CargaDeDados {
 			doc.put("cidade", p.getCidade());
 			doc.put("estado", p.getEstado());
 			doc.put("cep", p.getCep());
-
-			doc.put("possuiOferta", p.getPossuiOferta());
-			doc.put("totalPessoasPresentes", p.getTotalPessoasPresentes());
-
 			//registros.add(doc);
 			try {
 				collection.insert(doc);
 			} catch (Exception e) {
-				System.out.println("Erro ID:" + p.getIdCorporativo());
+				System.out.println("Erro:" + p.getNome());
 			}
 		}
 
