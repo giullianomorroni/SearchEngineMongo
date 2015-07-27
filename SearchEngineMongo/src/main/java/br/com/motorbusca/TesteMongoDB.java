@@ -10,8 +10,8 @@ import br.com.motorbusca.modelo.PontoDeInteresse;
 public class TesteMongoDB {
 
 	public static void main(String[] args) throws SQLException {
-		consultaPorProximidade(-23.568570, -46.647563, 2000.0, 0, 10);
-		consultaPorProximidade(-23.568570, -46.647563, 2000.0, "Bar", 1, 10);
+		consultaPorProximidade(-23.607289, -46.694393, 2000.0, 0, 10);
+		consultaPorProximidade(-23.607289, -46.694393, 2000.0, "Bar", 1, 10);
 		consultaPorPalavraChave("banco", 0, 10);
 	}
 

@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.bson.Document;
+import org.bson.conversions.Bson;
+
 import br.com.motorbusca.base.BaseDeDados;
 import br.com.motorbusca.modelo.Distancia;
 import br.com.motorbusca.modelo.PontoDeInteresse;
@@ -13,9 +16,10 @@ import br.com.motorbusca.modelo.PontoDeInteresse;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.CommandResult;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.util.JSON;
 
 public class Consulta {
@@ -54,7 +58,7 @@ public class Consulta {
 		query.append("sort", "dis");
 		query.append("num", totalRegistros);
 
-		CommandResult resultado = BaseDeDados.conexao().command(query);
+		BasicDBObject resultado = BaseDeDados.conexao().runCommand(query, CommandResult.class);
 		BasicDBObject json = (BasicDBObject) JSON.parse(resultado.toString());
 		BasicDBList resultados = (BasicDBList) json.get("results");
 		if(resultados == null)
@@ -104,7 +108,7 @@ public class Consulta {
 			return pontosPorProximidade(latitude, longitude, raioDeBusca, paginaAtual, totalPorPagina);
 
 		List<PontoDeInteresse> pontos = new ArrayList<>();
-		DBCollection colecao = BaseDeDados.colecao("poi");
+		MongoCollection<Document> colecao = BaseDeDados.colecao("poi");
 
 		BasicDBObject query = new BasicDBObject(); 
 		Double[] posicao = {longitude, latitude};
@@ -154,13 +158,15 @@ public class Consulta {
 			query.append("$and", dbListAnd);
 		}
 
-		DBCursor resultado = colecao.find(query);
+		FindIterable<Document> resultado = colecao.find(query);
 		if(resultado == null)
 			return pontos;
 
 		resultado = paginacao(totalRegistros, 10, null, resultado);
 
-		for (DBObject poi : resultado.toArray()) {
+		MongoCursor<Document> iterator = resultado.iterator();
+		while (iterator.hasNext()) {
+			Document poi = iterator.next();
 			PontoDeInteresse ponto = new PontoDeInteresse();
 			ponto.setNome((String) poi.get("nome"));
 			ponto.setCategoria((String) poi.get("categoria"));
@@ -184,7 +190,7 @@ public class Consulta {
 
 	public List<PontoDeInteresse> pontosPorPalavraChave(String palavraChave, Integer paginaAtual, Integer totalPorPagina) {
 		List<PontoDeInteresse> pontos = new ArrayList<>();
-		DBCollection colecao = BaseDeDados.colecao("poi");
+		MongoCollection<Document> colecao = BaseDeDados.colecao("poi");
 
 		BasicDBObject query = new BasicDBObject(); 
 		BasicDBList dbList = new BasicDBList();
@@ -209,13 +215,15 @@ public class Consulta {
 		paginaAtual += 1;
 		int totalRegistros = paginaAtual * totalPorPagina;
 
-		DBCursor resultado = colecao.find(query);
+		FindIterable<Document> resultado = colecao.find(query);
 		if(resultado == null)
 			return pontos;
 
 		resultado = paginacao(totalRegistros, 10, null, resultado);
 
-		for (DBObject poi : resultado.toArray()) {
+		MongoCursor<Document> iterator = resultado.iterator();
+		while (iterator.hasNext()) {
+			Document poi = iterator.next();
 			PontoDeInteresse ponto = new PontoDeInteresse();
 			ponto.setNome((String) poi.get("nome"));
 			ponto.setCategoria((String) poi.get("categoria"));
@@ -240,10 +248,10 @@ public class Consulta {
 	 * @param resultado
 	 * @return
 	 */
-	private static DBCursor paginacao(int start, int limit, String ordenarPor, DBCursor resultado) {
+	private static FindIterable<Document> paginacao(int start, int limit, String ordenarPor, FindIterable<Document> resultado) {
         if (ordenarPor != null) {
         	String order = "desc";
-        	DBObject sortCriteria = new BasicDBObject(ordenarPor, "desc".equals(order) ? -1 : 1); 
+        	Bson sortCriteria = new Document(ordenarPor, "desc".equals(order) ? -1 : 1); 
         	resultado.sort(sortCriteria);
         }
         resultado.skip(start).limit(limit);

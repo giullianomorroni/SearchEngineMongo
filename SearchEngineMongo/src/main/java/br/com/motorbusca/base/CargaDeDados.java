@@ -8,12 +8,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bson.Document;
+
 import br.com.motorbusca.modelo.Fonetica;
 import br.com.motorbusca.modelo.PontoDeInteresse;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.mongodb.client.MongoCollection;
 
 public class CargaDeDados {
 
@@ -26,7 +27,6 @@ public class CargaDeDados {
 	 * @throws SQLException 
 	 */
 	public static void main(String[] args) throws UnknownHostException, SQLException {
-
 		String SQL = "SELECT " +  
 					" ESTABELECIMENTO.ID AS ID_ESTABELECIMENTO, " +
 					" ESTABELECIMENTO.NOME_FANTASIA AS NOME_FANTASIA, " +
@@ -75,9 +75,9 @@ public class CargaDeDados {
 
 		System.out.println("Foram encontrados " + pois.size());
 
-		DBCollection collection = BaseDeDados.colecao("poi");
+		MongoCollection<Document> collection = BaseDeDados.colecao("poi");
 		for (PontoDeInteresse p : pois) {
-			DBObject doc = new BasicDBObject();
+			Document doc = new Document();
 			doc.put("nome", p.getNome());
 			doc.put("fonema", p.getFonema());
 
@@ -93,7 +93,7 @@ public class CargaDeDados {
 			doc.put("cep", p.getCep());
 			//registros.add(doc);
 			try {
-				collection.insert(doc);
+				collection.insertOne(doc);
 			} catch (Exception e) {
 				System.out.println("Erro:" + p.getNome());
 			}

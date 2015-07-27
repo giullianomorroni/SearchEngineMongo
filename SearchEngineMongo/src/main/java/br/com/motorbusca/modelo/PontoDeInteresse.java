@@ -24,6 +24,23 @@ public class PontoDeInteresse implements Serializable {
 		super();
 	}
 
+	public PontoDeInteresse(String nome, String categoria) {
+		super();
+		this.nome = nome;
+		this.fonema = Fonetica.criarFonema(nome);
+		this.categoria = categoria;
+	}
+
+	public PontoDeInteresse endereco(String logradouro, String cidade, String estado, String cep, Double latitude, Double longitude) {
+		this.logradouro = logradouro;
+		this.cidade = cidade;
+		this.estado = estado;
+		this.cep = cep;
+		this.latitude = latitude;
+		this.longitude = longitude;
+		return this;
+	}
+
 	public PontoDeInteresse(String nome, String fonema, String pictograma,
 			String categoria, String subCategoria, String logradouro,
 			String cidade, String estado, String cep, Double latitude,
